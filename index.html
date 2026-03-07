@@ -3,32 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menù Giochi | 8 Marzo</title>
+    <title>Lista Giochi | 8 Marzo</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #ffffff; padding: 20px; margin: 0; }
-        h1 { text-align: center; color: #facc15; margin-bottom: 20px; }
+        h1 { text-align: center; color: #facc15; margin-bottom: 25px; }
         
-        /* Stili per i Filtri */
-        .filters-container { display: none; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; }
+        /* Contenitore per le due righe di filtri */
+        .filters-wrapper { display: none; flex-direction: column; gap: 15px; margin-bottom: 35px; }
+        .filter-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+        
+        /* Stile dei bottoni filtro */
         .filter-btn { background-color: #1e1e1e; color: #aaa; border: 2px solid #333; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.2s; font-size: 0.9em; }
         .filter-btn:hover { border-color: #666; color: white; }
         
-        /* Classi per i bottoni dei filtri attivi */
+        /* Colori per i filtri attivi del TIPO */
         .filter-btn.active.f-tutti { background-color: #facc15; border-color: #facc15; color: #121212; }
         .filter-btn.active.f-veloci { background-color: #f59e0b; border-color: #f59e0b; color: #121212; }
         .filter-btn.active.f-collaborare { background-color: #10b981; border-color: #10b981; color: #121212; }
         .filter-btn.active.f-bluff { background-color: #8b5cf6; border-color: #8b5cf6; color: white; }
         .filter-btn.active.f-strategia { background-color: #ef4444; border-color: #ef4444; color: white; }
+        
+        /* Colori per i filtri attivi della DIFFICOLTÀ */
+        .filter-btn.active.f-diff { background-color: #eab308; border-color: #eab308; color: #121212; }
 
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; max-width: 1000px; margin: auto; }
-        .game-card { background: #1e1e1e; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 8px rgba(0,0,0,0.5); position: relative; animation: fadeIn 0.3s ease-in-out; }
+        /* Griglia distanziata */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 35px; max-width: 1000px; margin: auto; }
+        .game-card { background: #1e1e1e; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.6); position: relative; animation: fadeIn 0.3s ease-in-out; }
         
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
         .card-img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background-color: #333; }
-        .card-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; text-align: center; }
-        .game-title { font-size: 1.1em; font-weight: bold; margin: 0 0 5px 0; }
-        .game-info { font-size: 0.8em; color: #aaa; margin-bottom: 12px; }
+        .card-content { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; text-align: center; }
+        .game-title { font-size: 1.1em; font-weight: bold; margin: 0 0 6px 0; }
+        .game-info { font-size: 0.85em; color: #aaa; margin-bottom: 15px; line-height: 1.4; }
         
         .type-label { position: absolute; top: 8px; left: 8px; padding: 4px 8px; border-radius: 4px; font-size: 0.7em; font-weight: 900; color: white; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.6); z-index: 10; }
         .tipo-veloci { background-color: #f59e0b; } 
@@ -39,10 +46,9 @@
 
         .badge { position: absolute; top: 8px; right: 8px; background: #e02424; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.6); z-index: 10; }
         
-        .btn-prenota { background-color: #2563eb; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: bold; width: 100%; transition: background 0.2s; }
+        .btn-prenota { background-color: #2563eb; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.95em; font-weight: bold; width: 100%; transition: background 0.2s; }
         .btn-prenota:hover { background-color: #1d4ed8; }
         
-        /* Stili per il caricamento */
         #loading-container { text-align: center; margin-bottom: 30px; margin-top: 40px; }
         #loading-text { font-size: 1.2em; color: #facc15; font-weight: bold; margin-bottom: 10px; }
         .progress-bar-bg { width: 100%; max-width: 300px; height: 10px; background-color: #333; border-radius: 5px; margin: auto; overflow: hidden; }
@@ -51,7 +57,7 @@
 </head>
 <body>
 
-    <h1>🎲 Menù Giochi Lillium</h1>
+    <h1>Lista Giochi | 8 Marzo</h1>
     
     <div id="loading-container">
         <div id="loading-text">Connessione alla ludoteca... 0%</div>
@@ -60,26 +66,34 @@
         </div>
     </div>
 
-    <div id="filters" class="filters-container">
-        <button class="filter-btn active f-tutti" onclick="applicaFiltro('TUTTI', this)">TUTTI</button>
-        <button class="filter-btn" onclick="applicaFiltro('VELOC', this)">VELOCI</button>
-        <button class="filter-btn" onclick="applicaFiltro('COLLABORAR', this)">COLLABORARE</button>
-        <button class="filter-btn" onclick="applicaFiltro('BLUFF', this)">BLUFF</button>
-        <button class="filter-btn" onclick="applicaFiltro('STRATEGIA', this)">STRATEGIA</button>
+    <div id="filters" class="filters-wrapper">
+        <div class="filter-row">
+            <button class="filter-btn btn-tipo active f-tutti" onclick="applicaFiltroTipo('TUTTI', this)">TUTTI I TIPI</button>
+            <button class="filter-btn btn-tipo" onclick="applicaFiltroTipo('VELOC', this)">VELOCI</button>
+            <button class="filter-btn btn-tipo" onclick="applicaFiltroTipo('COLLABORAR', this)">COLLABORARE</button>
+            <button class="filter-btn btn-tipo" onclick="applicaFiltroTipo('BLUFF', this)">BLUFF</button>
+            <button class="filter-btn btn-tipo" onclick="applicaFiltroTipo('STRATEGIA', this)">STRATEGIA</button>
+        </div>
+        <div class="filter-row">
+            <button class="filter-btn btn-diff active f-diff" onclick="applicaFiltroDiff('TUTTE', this)">TUTTE LE DIFFICOLTÀ</button>
+            <button class="filter-btn btn-diff" onclick="applicaFiltroDiff('⭐', this)">⭐</button>
+            <button class="filter-btn btn-diff" onclick="applicaFiltroDiff('⭐⭐', this)">⭐⭐</button>
+            <button class="filter-btn btn-diff" onclick="applicaFiltroDiff('⭐⭐⭐', this)">⭐⭐⭐</button>
+            <button class="filter-btn btn-diff" onclick="applicaFiltroDiff('⭐⭐⭐⭐', this)">⭐⭐⭐⭐</button>
+        </div>
     </div>
 
     <div id="game-list" class="grid-container" style="display: none;"></div>
 
     <script>
         // ⚠️ INCOLLA QUI L'URL DI GOOGLE APPS SCRIPT
-        const API_URL = "https://script.google.com/macros/s/AKfycbwOYxkEbMaQvrwcF-V6je7HlX7Rn2G8P53Go3n6RqAIp8N14BNfYlHcUiQhHw5gtPFx6g/exec";
-        
-        const DEFAULT_IMG = "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg";
+        const API_URL = "INCOLLA_QUI_IL_TUO_URL";
+        const DEFAULT_IMG = "https://images.unsplash.com/photo-1610890716175-3047a049d564?q=80&w=400&auto=format&fit=crop";
 
-        let tuttiIGiochi = []; // Memoria globale per tutti i giochi scaricati
-        let filtroAttivo = 'TUTTI'; // Memorizza il filtro attualmente selezionato
+        let tuttiIGiochi = []; 
+        let filtroTipoAttivo = 'TUTTI'; 
+        let filtroDiffAttivo = 'TUTTE';
 
-        // Funzione per disegnare le card (accetta l'array di giochi da mostrare)
         function disegnaGriglia(listaGiochi) {
             const list = document.getElementById('game-list');
             list.innerHTML = '';
@@ -99,6 +113,9 @@
                 let badgeHtml = contatore > 0 ? `<div class="badge">${contatore}</div>` : '';
                 
                 let imageUrl = gioco.IMMAGINE ? gioco.IMMAGINE : DEFAULT_IMG;
+                
+                // Recupera la difficoltà in modo robusto (gestisce sia la colonna con accento che senza)
+                let diff = (gioco.DIFFICOLTA || gioco['DIFFICOLTÀ'] || "").trim();
 
                 card.innerHTML = `
                     <div class="type-label ${tipoClass}">${gioco.TIPO_EFFETTIVO}</div>
@@ -107,7 +124,7 @@
                     <div class="card-content">
                         <div>
                             <div class="game-title">${gioco.GIOCO}</div>
-                            <div class="game-info">👥 ${gioco["N.G."]} | ⏳ ${gioco.DURATA}'<br> ${gioco.DIFFICOLTA}</div>
+                            <div class="game-info">👥 ${gioco["N.G."]} | ⏳ ${gioco.DURATA}'<br>${diff}</div>
                         </div>
                         <button class="btn-prenota" onclick="prenota('${gioco.GIOCO}')">Prenota</button>
                     </div>
@@ -116,32 +133,51 @@
             });
         }
 
-        // Funzione per gestire i click sui bottoni dei filtri
-        function applicaFiltro(tipo, bottonePremuto) {
-            filtroAttivo = tipo;
-
-            // Aggiorna lo stile dei bottoni (toglie 'active' da tutti, lo mette a quello premuto)
-            if (bottonePremuto) {
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    // Rimuove tutte le classi di colore attivo
-                    btn.classList.remove('active', 'f-tutti', 'f-veloci', 'f-collaborare', 'f-bluff', 'f-strategia');
+        function filtraERidisegna() {
+            let filtrati = tuttiIGiochi;
+            
+            // Filtro per TIPO
+            if (filtroTipoAttivo !== 'TUTTI') {
+                filtrati = filtrati.filter(g => g.TIPO_EFFETTIVO.includes(filtroTipoAttivo));
+            }
+            
+            // Filtro per DIFFICOLTÀ (Con operatore AND)
+            if (filtroDiffAttivo !== 'TUTTE') {
+                filtrati = filtrati.filter(g => {
+                    let diff = (g.DIFFICOLTA || g['DIFFICOLTÀ'] || "").trim();
+                    return diff === filtroDiffAttivo;
                 });
-                
+            }
+            
+            disegnaGriglia(filtrati);
+        }
+
+        function applicaFiltroTipo(tipo, bottonePremuto) {
+            filtroTipoAttivo = tipo;
+            
+            if (bottonePremuto) {
+                document.querySelectorAll('.btn-tipo').forEach(btn => btn.classList.remove('active', 'f-tutti', 'f-veloci', 'f-collaborare', 'f-bluff', 'f-strategia'));
                 bottonePremuto.classList.add('active');
+                
                 if(tipo === 'TUTTI') bottonePremuto.classList.add('f-tutti');
                 else if(tipo.includes('VELOC')) bottonePremuto.classList.add('f-veloci');
                 else if(tipo.includes('COLLABORAR')) bottonePremuto.classList.add('f-collaborare');
                 else if(tipo.includes('BLUFF')) bottonePremuto.classList.add('f-bluff');
                 else if(tipo.includes('STRATEGIA')) bottonePremuto.classList.add('f-strategia');
             }
+            
+            filtraERidisegna();
+        }
 
-            // Filtra l'array e ridisegna
-            if (tipo === 'TUTTI') {
-                disegnaGriglia(tuttiIGiochi);
-            } else {
-                const giochiFiltrati = tuttiIGiochi.filter(g => g.TIPO_EFFETTIVO.includes(tipo));
-                disegnaGriglia(giochiFiltrati);
+        function applicaFiltroDiff(diff, bottonePremuto) {
+            filtroDiffAttivo = diff;
+            
+            if (bottonePremuto) {
+                document.querySelectorAll('.btn-diff').forEach(btn => btn.classList.remove('active', 'f-diff'));
+                bottonePremuto.classList.add('active', 'f-diff');
             }
+            
+            filtraERidisegna();
         }
 
         async function caricaGiochi(isPrenotazione = false) {
@@ -173,16 +209,15 @@
                 const response = await fetch(API_URL);
                 let data = await response.json();
                 
-                // PRE-ELABORAZIONE DATI: Risolve le celle vuote della colonna TIPO
                 let ultimoTipoConosciuto = "GIOCO";
                 data.forEach(gioco => {
                     if (gioco.TIPO && gioco.TIPO.trim() !== "") {
                         ultimoTipoConosciuto = gioco.TIPO.trim().toUpperCase();
                     }
-                    gioco.TIPO_EFFETTIVO = ultimoTipoConosciuto; // Crea una nuova proprietà sicura
+                    gioco.TIPO_EFFETTIVO = ultimoTipoConosciuto; 
                 });
 
-                tuttiIGiochi = data; // Salva i dati completi in memoria
+                tuttiIGiochi = data; 
                 
                 clearInterval(progressInterval);
                 loadingText.innerText = "Fatto! 100%";
@@ -190,11 +225,11 @@
                 
                 setTimeout(() => {
                     loadingContainer.style.display = 'none';
-                    filters.style.display = 'flex'; // Mostra i bottoni dei filtri
+                    filters.style.display = 'flex'; 
                     gameList.style.display = 'grid';
                     
-                    // Ridisegna mantenendo il filtro che era attivo (utile dopo una prenotazione!)
-                    applicaFiltro(filtroAttivo, null);
+                    // Ridisegna mantenendo i filtri attivi (tipo E difficoltà)
+                    filtraERidisegna();
                 }, 300);
 
             } catch (error) {
