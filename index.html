@@ -41,7 +41,29 @@
         .game-title { font-size: 1.1em; font-weight: bold; margin: 0 0 5px 0; }
         .game-info { font-size: 0.8em; color: #aaa; margin-bottom: 12px; }
         
-        /* Bollino rosso del contatore */
+        /* ETICHETTA TIPO (In alto a sinistra) */
+        .type-label {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: 900;
+            color: white;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+        
+        /* Colori per le categorie */
+        .tipo-veloci { background-color: #f59e0b; } /* Arancione */
+        .tipo-collaborare { background-color: #10b981; } /* Verde */
+        .tipo-bluff { background-color: #8b5cf6; } /* Viola */
+        .tipo-strategia { background-color: #ef4444; } /* Rosso */
+        .tipo-default { background-color: #64748b; } /* Grigio base per tipi non riconosciuti */
+
+        /* Bollino rosso del contatore (In alto a destra) */
         .badge { 
             position: absolute; 
             top: 8px; 
@@ -56,7 +78,8 @@
             justify-content: center; 
             font-weight: bold; 
             font-size: 0.9em; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.6); 
+            z-index: 10;
         }
         
         /* Bottone prenota */
@@ -73,11 +96,10 @@
     <div id="game-list" class="grid-container"></div>
 
     <script>
-        // ⚠️ INCOLLA QUI IL NUOVO URL DI GOOGLE APPS SCRIPT
+        // ⚠️ INCOLLA QUI L'URL DI GOOGLE APPS SCRIPT
         const API_URL = "https://script.google.com/macros/s/AKfycbwOYxkEbMaQvrwcF-V6je7HlX7Rn2G8P53Go3n6RqAIp8N14BNfYlHcUiQhHw5gtPFx6g/exec";
         
-        // Immagine di default se manca il link nel CSV
-        const DEFAULT_IMG = "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg";
+        const DEFAULT_IMG = "https://images.unsplash.com/photo-1610890716175-3047a049d564?q=80&w=400&auto=format&fit=crop";
 
         async function caricaGiochi() {
             try {
@@ -88,27 +110,40 @@
                 const list = document.getElementById('game-list');
                 list.innerHTML = '';
 
+                let ultimoTipoConosciuto = "GIOCO"; // Memoria per le celle vuote di Excel
+
                 data.forEach(gioco => {
                     const card = document.createElement('div');
                     card.className = 'game-card';
                     
-                    // Gestione del contatore prenotazioni
+                    // GESTIONE DEL TIPO (con recupero automatico se la cella è vuota)
+                    let tipoAttuale = gioco.TIPO ? gioco.TIPO.trim().toUpperCase() : ultimoTipoConosciuto;
+                    ultimoTipoConosciuto = tipoAttuale; // salva per il giro successivo
+                    
+                    // Assegnazione del colore in base al nome
+                    let tipoClass = "tipo-default";
+                    if(tipoAttuale.includes("VELOC")) tipoClass = "tipo-veloci";
+                    else if(tipoAttuale.includes("COLLABORAR") || tipoAttuale.includes("COOP")) tipoClass = "tipo-collaborare";
+                    else if(tipoAttuale.includes("BLUFF")) tipoClass = "tipo-bluff";
+                    else if(tipoAttuale.includes("STRATEGIA")) tipoClass = "tipo-strategia";
+
+                    // GESTIONE CONTATORE PRENOTAZIONI
                     let contatore = parseInt(gioco.PRENOTAZIONI);
                     contatore = isNaN(contatore) ? 0 : contatore;
-                    
-                    // Mostra il bollino rosso solo se c'è almeno 1 prenotazione
                     let badgeHtml = contatore > 0 ? `<div class="badge">${contatore}</div>` : '';
                     
-                    // Gestione Immagine
+                    // GESTIONE IMMAGINE
                     let imageUrl = gioco.IMMAGINE ? gioco.IMMAGINE : DEFAULT_IMG;
 
+                    // CREAZIONE DELLA CARD HTML
                     card.innerHTML = `
+                        <div class="type-label ${tipoClass}">${tipoAttuale}</div>
                         ${badgeHtml}
                         <img src="${imageUrl}" alt="${gioco.GIOCO}" class="card-img" onerror="this.src='${DEFAULT_IMG}'">
                         <div class="card-content">
                             <div>
                                 <div class="game-title">${gioco.GIOCO}</div>
-                                <div class="game-info">👥 ${gioco["N.G."]} | ⏳ ${gioco.DURATA}'<br> ${gioco.DIFFICOLTA}</div>
+                                <div class="game-info">👥 ${gioco["N.G."]} | ⏳ ${gioco.DURATA}'<br>🧠 ${gioco.DIFFICOLTA}</div>
                             </div>
                             <button class="btn-prenota" onclick="prenota('${gioco.GIOCO}')">Prenota</button>
                         </div>
@@ -125,24 +160,18 @@
             let nomeTavolo = prompt(`Vuoi giocare a ${nomeGioco}? Inserisci il nome del tuo tavolo:`);
             if (!nomeTavolo) return;
 
-            // Avviso visivo temporaneo
             alert("Richiesta inviata! Attendi un istante...");
             
-            // Chiamata in background per aggiornare il Google Sheet
             let urlPrenotazione = `${API_URL}?action=prenota&gioco=${encodeURIComponent(nomeGioco)}&nome=${encodeURIComponent(nomeTavolo)}`;
             
             await fetch(urlPrenotazione);
             
-            // Ricarica la griglia per aggiornare il numerino rosso
             document.getElementById('loading').style.display = 'block';
             document.getElementById('game-list').innerHTML = '';
             caricaGiochi();
         }
 
-        // Avvio automatico al caricamento della pagina
         caricaGiochi();
     </script>
 </body>
 </html>
-
-
