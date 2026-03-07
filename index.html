@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lillium - Menù Giochi</title>
+    <title>LET'S PLAY | 8 Marzo</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #ffffff; padding: 20px; margin: 0; }
         h1 { text-align: center; color: #facc15; margin-bottom: 30px; }
@@ -99,7 +99,7 @@
         // ⚠️ INCOLLA QUI L'URL DI GOOGLE APPS SCRIPT
         const API_URL = "https://script.google.com/macros/s/AKfycbwOYxkEbMaQvrwcF-V6je7HlX7Rn2G8P53Go3n6RqAIp8N14BNfYlHcUiQhHw5gtPFx6g/exec";
         
-        const DEFAULT_IMG = "https://images.unsplash.com/photo-1610890716175-3047a049d564?q=80&w=400&auto=format&fit=crop";
+        const DEFAULT_IMG = "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg";
 
         async function caricaGiochi() {
             try {
@@ -143,7 +143,7 @@
                         <div class="card-content">
                             <div>
                                 <div class="game-title">${gioco.GIOCO}</div>
-                                <div class="game-info">👥 ${gioco["N.G."]} | ⏳ ${gioco.DURATA}'<br>🧠 ${gioco.DIFFICOLTA}</div>
+                                <div class="game-info">👥 ${gioco["N.G."]} | ⏳ ${gioco.DURATA}'<br> ${gioco.DIFFICOLTA}</div>
                             </div>
                             <button class="btn-prenota" onclick="prenota('${gioco.GIOCO}')">Prenota</button>
                         </div>
@@ -175,3 +175,4 @@
     </script>
 </body>
 </html>
+
