@@ -4,265 +4,611 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista Giochi | 8 Marzo</title>
+    <!-- Usa un font di sistema pulito o importa un font google se preferisci -->
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #ffffff; padding: 20px; margin: 0; }
-        h1 { text-align: center; color: #facc15; margin-bottom: 25px; }
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --accent: #facc15;
+            --btn-blue: #2563eb;
+            --btn-blue-hover: #1d4ed8;
+            --danger: #e02424;
+            --tipo-veloce: #f59e0b;
+            --tipo-coop: #10b981;
+            --tipo-bluff: #8b5cf6;
+            --tipo-strategia: #ef4444;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-main); padding: 15px; margin: 0; padding-bottom: 80px; }
+        h1 { text-align: center; color: var(--accent); margin-bottom: 20px; font-size: 1.8em; }
         
-        /* Contenitore per le due righe di filtri */
-        .filters-wrapper { display: none; flex-direction: column; gap: 15px; margin-bottom: 35px; }
-        .filter-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+        /* Loading Animation */
+        #loading-container { text-align: center; margin: 40px 0; }
+        #loading-text { font-size: 1.1em; color: var(--accent); font-weight: bold; margin-bottom: 10px; }
+        .progress-bar-bg { width: 100%; max-width: 300px; height: 8px; background-color: #333; border-radius: 4px; margin: auto; overflow: hidden; }
+        .progress-bar-fill { height: 100%; width: 0%; background-color: var(--accent); transition: width 0.2s ease-out; }
+
+        /* Controlli Superiori (Filtri, Sort, Ricerca) */
+        .controls-section { display: none; flex-direction: column; gap: 15px; margin-bottom: 25px; max-width: 1000px; margin-left: auto; margin-right: auto; }
         
-        /* Stile dei bottoni filtro */
-        .filter-btn { background-color: #1e1e1e; color: #aaa; border: 2px solid #333; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.2s; font-size: 0.9em; }
+        .filters-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+        
+        .control-group { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; background: #1a1a1a; padding: 10px; border-radius: 10px; border: 1px solid #333; }
+        .control-label { font-size: 0.85em; color: var(--text-muted); text-transform: uppercase; font-weight: bold; }
+        
+        select.sort-select { background: #2a2a2a; color: white; border: 1px solid #444; padding: 6px 10px; border-radius: 6px; font-size: 0.9em; outline: none; }
+        
+        /* Bottoni Filtro */
+        .filter-btn { background-color: transparent; color: var(--text-muted); border: 1px solid #444; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 0.85em; transition: all 0.2s; }
         .filter-btn:hover { border-color: #666; color: white; }
         
-        /* Colori per i filtri attivi del TIPO */
-        .filter-btn.active.f-tutti { background-color: #facc15; border-color: #facc15; color: #121212; }
-        .filter-btn.active.f-veloci { background-color: #f59e0b; border-color: #f59e0b; color: #121212; }
-        .filter-btn.active.f-collaborare { background-color: #10b981; border-color: #10b981; color: #121212; }
-        .filter-btn.active.f-bluff { background-color: #8b5cf6; border-color: #8b5cf6; color: white; }
-        .filter-btn.active.f-strategia { background-color: #ef4444; border-color: #ef4444; color: white; }
-        
-        /* Colori per i filtri attivi della DIFFICOLTÀ */
-        .filter-btn.active.f-diff { background-color: #eab308; border-color: #eab308; color: #121212; }
+        .filter-btn.active.f-tutti { background-color: var(--accent); border-color: var(--accent); color: var(--bg-color); }
+        .filter-btn.active.f-veloci { background-color: var(--tipo-veloce); border-color: var(--tipo-veloce); color: var(--bg-color); }
+        .filter-btn.active.f-coop { background-color: var(--tipo-coop); border-color: var(--tipo-coop); color: var(--bg-color); }
+        .filter-btn.active.f-bluff { background-color: var(--tipo-bluff); border-color: var(--tipo-bluff); color: white; }
+        .filter-btn.active.f-strat { background-color: var(--tipo-strategia); border-color: var(--tipo-strategia); color: white; }
+        .filter-btn.active.f-gioc { background-color: #3b82f6; border-color: #3b82f6; color: white; }
 
-        /* Griglia distanziata */
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 35px; max-width: 1000px; margin: auto; }
-        .game-card { background: #1e1e1e; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.6); position: relative; animation: fadeIn 0.3s ease-in-out; }
+        /* Bottone Sommelier */
+        .btn-sommelier { background: linear-gradient(45deg, #8b5cf6, #ec4899); color: white; border: none; padding: 12px 20px; border-radius: 25px; font-weight: bold; font-size: 1em; cursor: pointer; width: 100%; max-width: 400px; margin: 0 auto 25px auto; display: none; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); }
         
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        /* Griglia Giochi */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; max-width: 1000px; margin: auto; }
+        .game-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.4); position: relative; animation: fadeIn 0.3s ease-in-out; border: 1px solid #2a2a2a; }
+        
+        .card-evidenza { border: 2px solid var(--accent); box-shadow: 0 0 15px rgba(250, 204, 21, 0.2); }
+        .ribbon-consigliato { position: absolute; top: 10px; left: -25px; background: var(--accent); color: #000; padding: 4px 30px; transform: rotate(-45deg); font-size: 0.65em; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 15; letter-spacing: 1px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .card-img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background-color: #333; }
         .card-content { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; text-align: center; }
-        .game-title { font-size: 1.1em; font-weight: bold; margin: 0 0 6px 0; }
-        .game-info { font-size: 0.85em; color: #aaa; margin-bottom: 15px; line-height: 1.4; }
+        .game-title { font-size: 1.1em; font-weight: 800; margin: 0 0 5px 0; line-height: 1.2; }
+        .game-info { font-size: 0.85em; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
         
-        .type-label { position: absolute; top: 8px; left: 8px; padding: 4px 8px; border-radius: 4px; font-size: 0.7em; font-weight: 900; color: white; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.6); z-index: 10; }
-        .tipo-veloci { background-color: #f59e0b; } 
-        .tipo-collaborare { background-color: #10b981; } 
-        .tipo-bluff { background-color: #8b5cf6; } 
-        .tipo-strategia { background-color: #ef4444; } 
-        .tipo-default { background-color: #64748b; } 
+        .type-label { position: absolute; top: 8px; right: 8px; padding: 4px 8px; border-radius: 4px; font-size: 0.65em; font-weight: 900; color: white; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.6); z-index: 10; }
+        .bg-veloci { background-color: var(--tipo-veloce); } 
+        .bg-coop { background-color: var(--tipo-coop); } 
+        .bg-bluff { background-color: var(--tipo-bluff); } 
+        .bg-strat { background-color: var(--tipo-strategia); } 
+        .bg-default { background-color: #64748b; } 
 
-        .badge { position: absolute; top: 8px; right: 8px; background: #e02424; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.6); z-index: 10; }
+        .badge { position: absolute; bottom: 8px; right: 8px; background: var(--danger); color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.6); z-index: 10; border: 2px solid var(--card-bg); }
         
-        .btn-prenota { background-color: #2563eb; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.95em; font-weight: bold; width: 100%; transition: background 0.2s; }
-        .btn-prenota:hover { background-color: #1d4ed8; }
-        
-        #loading-container { text-align: center; margin-bottom: 30px; margin-top: 40px; }
-        #loading-text { font-size: 1.2em; color: #facc15; font-weight: bold; margin-bottom: 10px; }
-        .progress-bar-bg { width: 100%; max-width: 300px; height: 10px; background-color: #333; border-radius: 5px; margin: auto; overflow: hidden; }
-        .progress-bar-fill { height: 100%; width: 0%; background-color: #facc15; transition: width 0.2s ease-out; }
+        .btn-prenota { background-color: var(--btn-blue); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; font-weight: bold; width: 100%; transition: background 0.2s; }
+        .btn-prenota:hover { background-color: var(--btn-blue-hover); }
+
+        /* VISTA ADMIN */
+        .admin-box { background: rgba(224, 36, 36, 0.1); border: 1px dashed var(--danger); padding: 8px; margin-top: 10px; border-radius: 6px; font-size: 0.8em; text-align: left; }
+        .admin-nomi { color: #fca5a5; font-weight: bold; margin-bottom: 5px; }
+        .btn-libera { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.9em; width: 100%; }
+
+        /* Classici Section */
+        .classici-section { display: none; margin-top: 50px; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto; border-top: 1px solid #333; padding-top: 30px; }
+        .classici-title { color: var(--text-muted); font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        .classici-grid { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .btn-classico { background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9em; display: flex; flex-direction: column; align-items: center; width: 140px; }
+        .btn-classico span { font-size: 0.7em; color: var(--text-muted); font-weight: normal; margin-bottom: 3px; }
+        .btn-classico:hover { background: #333; border-color: var(--accent); }
+
+        /* MODAL PRENOTAZIONE */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 15px; width: 90%; max-width: 350px; text-align: center; border: 1px solid #333; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .modal-title { font-size: 1.3em; font-weight: bold; margin-bottom: 10px; color: var(--accent); }
+        .modal-desc { font-size: 0.9em; color: var(--text-muted); margin-bottom: 20px; }
+        .modal-input { width: 100%; padding: 12px; box-sizing: border-box; background: #121212; border: 1px solid #444; color: white; border-radius: 8px; font-size: 1em; margin-bottom: 20px; text-align: center; }
+        .modal-input:focus { outline: none; border-color: var(--btn-blue); }
+        .modal-buttons { display: flex; gap: 10px; }
+        .btn-cancel { flex: 1; background: #333; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-confirm { flex: 2; background: var(--btn-blue); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+        /* Sommelier Quiz UI (Simple Implementation for now) */
+        #sommelier-result { display: none; text-align: center; margin: 20px 0; padding: 20px; background: rgba(139, 92, 246, 0.1); border: 1px solid var(--tipo-bluff); border-radius: 12px; }
+        .sommelier-close { background: transparent; color: var(--text-muted); border: 1px solid #555; padding: 5px 15px; border-radius: 15px; cursor: pointer; margin-top: 15px; }
+
     </style>
 </head>
 <body>
 
-    <h1>Lista Giochi | 8 Marzo</h1>
+    <h1 id="main-title">🎲 Menù Giochi Lillium</h1>
     
+    <!-- Animazione di Caricamento -->
     <div id="loading-container">
-        <div id="loading-text">Connessione alla ludoteca... 0%</div>
+        <div id="loading-text">Connessione al bancone... 0%</div>
         <div class="progress-bar-bg">
             <div id="progress-fill" class="progress-bar-fill"></div>
         </div>
     </div>
 
-    <div id="filters" class="filters-wrapper">
-        <div class="filter-row">
-            <button class="filter-btn btn-tipo active f-tutti" onclick="applicaFiltroTipo('TUTTI', this)">TUTTI I TIPI</button>
-            <button class="filter-btn btn-tipo" onclick="applicaFiltroTipo('VELOC', this)">VELOCI</button>
-            <button class="filter-btn btn-tipo" onclick="applicaFiltroTipo('COLLABORAR', this)">COLLABORARE</button>
-            <button class="filter-btn btn-tipo" onclick="applicaFiltroTipo('BLUFF', this)">BLUFF</button>
-            <button class="filter-btn btn-tipo" onclick="applicaFiltroTipo('STRATEGIA', this)">STRATEGIA</button>
+    <!-- Bottone Sommelier -->
+    <button id="btn-sommelier" class="btn-sommelier" onclick="avviaSommelier()">✨ Non sai cosa scegliere? Clicca qui!</button>
+
+    <div id="sommelier-result">
+        <h3 style="color: var(--tipo-bluff); margin-top:0;">Il Gioco Perfetto per voi:</h3>
+        <p style="font-size: 0.9em; color: var(--text-muted); margin-bottom: 15px;">In base a <span id="somm-criteri" style="color:white; font-weight:bold;"></span></p>
+        <button class="sommelier-close" onclick="chiudiSommelier()">Annulla e torna alla lista completa</button>
+    </div>
+
+    <!-- Controlli (Filtri e Ordinamento) -->
+    <div id="controls" class="controls-section">
+        
+        <!-- Filtro Categoria -->
+        <div class="control-group">
+            <div class="filters-row" id="filter-tipo">
+                <button class="filter-btn active f-tutti" onclick="applicaFiltroTipo('TUTTI', this)">Tutti i Tipi</button>
+                <button class="filter-btn" onclick="applicaFiltroTipo('VELOC', this)">⚡ Lampo / Caciara</button>
+                <button class="filter-btn" onclick="applicaFiltroTipo('COLLABORAR', this)">🤝 Tutti Uniti</button>
+                <button class="filter-btn" onclick="applicaFiltroTipo('BLUFF', this)">🤫 Sospetto</button>
+                <button class="filter-btn" onclick="applicaFiltroTipo('STRATEGIA', this)">🧠 Tattica</button>
+            </div>
         </div>
-        <div class="filter-row">
-            <button class="filter-btn btn-diff active f-diff" onclick="applicaFiltroDiff('TUTTE', this)">TUTTE LE DIFFICOLTÀ</button>
-            <button class="filter-btn btn-diff" onclick="applicaFiltroDiff('⭐', this)">⭐</button>
-            <button class="filter-btn btn-diff" onclick="applicaFiltroDiff('⭐⭐', this)">⭐⭐</button>
-            <button class="filter-btn btn-diff" onclick="applicaFiltroDiff('⭐⭐⭐', this)">⭐⭐⭐</button>
-            <button class="filter-btn btn-diff" onclick="applicaFiltroDiff('⭐⭐⭐⭐', this)">⭐⭐⭐⭐</button>
+
+        <!-- Filtro Giocatori e Ordinamento -->
+        <div class="control-group">
+            <span class="control-label">Siamo in:</span>
+            <div class="filters-row" id="filter-giocatori">
+                <button class="filter-btn active f-gioc" onclick="applicaFiltroGiocatori('TUTTI', this)">Tutti</button>
+                <button class="filter-btn" onclick="applicaFiltroGiocatori(2, this)">2</button>
+                <button class="filter-btn" onclick="applicaFiltroGiocatori(3, this)">3</button>
+                <button class="filter-btn" onclick="applicaFiltroGiocatori(4, this)">4</button>
+                <button class="filter-btn" onclick="applicaFiltroGiocatori(5, this)">5</button>
+                <button class="filter-btn" onclick="applicaFiltroGiocatori(6, this)">6</button>
+                <button class="filter-btn" onclick="applicaFiltroGiocatori(7, this)">7+</button>
+            </div>
+            
+            <div style="width: 1px; height: 20px; background: #444; margin: 0 10px;"></div>
+            
+            <span class="control-label">Ordina:</span>
+            <select class="sort-select" id="sort-select" onchange="applicaOrdinamento()">
+                <option value="consigliati">🌟 Consigliati prima</option>
+                <option value="az">🔤 Alfabetico (A-Z)</option>
+                <option value="durata_asc">⏳ Più veloci prima</option>
+                <option value="diff_asc">🟢 Più facili prima</option>
+            </select>
         </div>
     </div>
 
+    <!-- Griglia dei Giochi -->
     <div id="game-list" class="grid-container" style="display: none;"></div>
 
+    <!-- Sezione Classici -->
+    <div id="classici-section" class="classici-section">
+        <div class="classici-title">Ispirati dai Grandi Classici</div>
+        <div class="classici-grid">
+            <button class="btn-classico" onclick="cercaGiocoEsatto('LAMA')">
+                <span>Se ami UNO</span>
+                Prova L.A.M.A.
+            </button>
+            <button class="btn-classico" onclick="cercaGiocoEsatto('DECRYPTO')">
+                <span>Se ami TABOO</span>
+                Prova DECRYPTO
+            </button>
+            <button class="btn-classico" onclick="cercaGiocoEsatto('NOME IN CODICE')">
+                <span>Se ami CLUEDO</span>
+                Prova NOME IN CODICE
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Prenotazione -->
+    <div id="modal-prenota" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-title" id="modal-game-name">Nome Gioco</div>
+            <div class="modal-desc">Chi sta richiedendo questo gioco? Inserisci il tuo nome o il numero del tavolo.</div>
+            <input type="text" id="modal-input-nome" class="modal-input" placeholder="Es: Tavolo 4, oppure Marco">
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="chiudiModal()">Annulla</button>
+                <button class="btn-confirm" onclick="confermaPrenotazione()">Invia Richiesta</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ⚠️ INCOLLA QUI L'URL DI GOOGLE APPS SCRIPT
-        const API_URL = "https://script.google.com/macros/s/AKfycbwOYxkEbMaQvrwcF-V6je7HlX7Rn2G8P53Go3n6RqAIp8N14BNfYlHcUiQhHw5gtPFx6g/exec";
-        
-        const DEFAULT_IMG = "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg";
+        // ==========================================
+        // CONFIGURAZIONE
+        // ==========================================
+        // ⚠️ INCOLLA QUI L'URL DI GOOGLE APPS SCRIPT V2.0
+        const API_URL = "https://script.google.com/macros/s/AKfycbzBtQ2-69eQ4j8Q7mAQF8FonTtTcxLNP-557Fs0tQJe/dev";
+        const DEFAULT_IMG = "https://images.unsplash.com/photo-1610890716175-3047a049d564?q=80&w=400&auto=format&fit=crop";
 
+        // ==========================================
+        // STATO DELL'APP
+        // ==========================================
         let tuttiIGiochi = []; 
-        let filtroTipoAttivo = 'TUTTI'; 
-        let filtroDiffAttivo = 'TUTTE';
+        let statoFiltri = {
+            tipo: 'TUTTI',
+            giocatori: 'TUTTI',
+            ricercaEsatta: null, // Usato per i pulsanti dei classici e sommelier
+            ordinamento: 'consigliati'
+        };
+        
+        let giocoDaPrenotare = "";
+        
+        // Controlla se siamo in modalità Admin leggendo l'URL (?admin=true)
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdmin = urlParams.get('admin') === 'true';
 
+        if(isAdmin) {
+            document.getElementById('main-title').innerText += " (ADMIN)";
+            document.getElementById('main-title').style.color = "var(--danger)";
+        }
+
+        // ==========================================
+        // FUNZIONI DI RENDER (Disegno interfaccia)
+        // ==========================================
         function disegnaGriglia(listaGiochi) {
             const list = document.getElementById('game-list');
             list.innerHTML = '';
+
+            if(listaGiochi.length === 0) {
+                list.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Nessun gioco trovato con questi filtri. Prova a cambiarli!</div>`;
+                return;
+            }
 
             listaGiochi.forEach(gioco => {
                 const card = document.createElement('div');
                 card.className = 'game-card';
                 
-                let tipoClass = "tipo-default";
-                if(gioco.TIPO_EFFETTIVO.includes("VELOC")) tipoClass = "tipo-veloci";
-                else if(gioco.TIPO_EFFETTIVO.includes("COLLABORAR") || gioco.TIPO_EFFETTIVO.includes("COOP")) tipoClass = "tipo-collaborare";
-                else if(gioco.TIPO_EFFETTIVO.includes("BLUFF")) tipoClass = "tipo-bluff";
-                else if(gioco.TIPO_EFFETTIVO.includes("STRATEGIA")) tipoClass = "tipo-strategia";
+                // Determina Colori Etichetta
+                let tipoClass = "bg-default";
+                if(gioco.TIPO_EFFETTIVO.includes("VELOC")) tipoClass = "bg-veloci";
+                else if(gioco.TIPO_EFFETTIVO.includes("COLLABORAR") || gioco.TIPO_EFFETTIVO.includes("COOP")) tipoClass = "bg-coop";
+                else if(gioco.TIPO_EFFETTIVO.includes("BLUFF")) tipoClass = "bg-bluff";
+                else if(gioco.TIPO_EFFETTIVO.includes("STRATEGIA")) tipoClass = "bg-strat";
 
+                // Contatore Prenotazioni
                 let contatore = parseInt(gioco.PRENOTAZIONI);
                 contatore = isNaN(contatore) ? 0 : contatore;
                 let badgeHtml = contatore > 0 ? `<div class="badge">${contatore}</div>` : '';
                 
+                // Immagine e Difficoltà sicura
                 let imageUrl = gioco.IMMAGINE ? gioco.IMMAGINE : DEFAULT_IMG;
-                
-                // Recupera la difficoltà in modo robusto (gestisce sia la colonna con accento che senza)
                 let diff = (gioco.DIFFICOLTA || gioco['DIFFICOLTÀ'] || "").trim();
+                
+                // Evidenza (Novità / Consigliati)
+                let isEvidenza = (gioco.EVIDENZA || "").toString().trim().toUpperCase() === "SI";
+                if(isEvidenza) card.classList.add('card-evidenza');
+                let ribbonHtml = isEvidenza ? `<div class="ribbon-consigliato">TOP</div>` : '';
 
-                card.innerHTML = `
+                // HTML Base della Card
+                let cardHtml = `
+                    ${ribbonHtml}
                     <div class="type-label ${tipoClass}">${gioco.TIPO_EFFETTIVO}</div>
-                    ${badgeHtml}
                     <img src="${imageUrl}" class="card-img" onerror="this.src='${DEFAULT_IMG}'">
                     <div class="card-content">
-                        <div>
+                        <div style="position: relative;">
+                            ${badgeHtml}
                             <div class="game-title">${gioco.GIOCO}</div>
                             <div class="game-info">👥 ${gioco["N.G."]} | ⏳ ${gioco.DURATA}'<br>${diff}</div>
                         </div>
-                        <button class="btn-prenota" onclick="prenota('${gioco.GIOCO}')">Prenota</button>
-                    </div>
+                        <button class="btn-prenota" onclick="apriModal('${gioco.GIOCO}')">Prenota</button>
                 `;
+
+                // Aggiunte specifiche per la VISTA ADMIN
+                if (isAdmin && contatore > 0) {
+                    let nomi = gioco.NOMI || gioco.PRENOTATO_DA || "Sconosciuto";
+                    cardHtml += `
+                        <div class="admin-box">
+                            <div class="admin-nomi">👤 ${nomi}</div>
+                            <button class="btn-libera" onclick="liberaGiocoAdmin('${gioco.GIOCO}')">Libera Gioco</button>
+                        </div>
+                    `;
+                }
+
+                cardHtml += `</div>`; // Chiude card-content
+                card.innerHTML = cardHtml;
                 list.appendChild(card);
             });
         }
 
-        function filtraERidisegna() {
+        // ==========================================
+        // LOGICA DI FILTRAGGIO E ORDINAMENTO
+        // ==========================================
+        function elaboraERidisegna() {
             let filtrati = tuttiIGiochi;
             
-            // Filtro per TIPO
-            if (filtroTipoAttivo !== 'TUTTI') {
-                filtrati = filtrati.filter(g => g.TIPO_EFFETTIVO.includes(filtroTipoAttivo));
+            // 0. Se c'è una ricerca esatta (es. pulsanti classici), ignora gli altri filtri
+            if (statoFiltri.ricercaEsatta) {
+                filtrati = filtrati.filter(g => g.GIOCO.toUpperCase().includes(statoFiltri.ricercaEsatta.toUpperCase()));
+            } else {
+                // 1. Filtro per TIPO
+                if (statoFiltri.tipo !== 'TUTTI') {
+                    filtrati = filtrati.filter(g => g.TIPO_EFFETTIVO.includes(statoFiltri.tipo));
+                }
+                
+                // 2. Filtro per NUMERO GIOCATORI (Range Parser Intelligente)
+                if (statoFiltri.giocatori !== 'TUTTI') {
+                    let target = parseInt(statoFiltri.giocatori);
+                    filtrati = filtrati.filter(g => {
+                        let rangeStr = (g["N.G."] || "").toString();
+                        if(!rangeStr) return false;
+                        
+                        // Cerca i numeri nella stringa (es. "2-4" -> [2, 4], "5" -> [5])
+                        let numeri = rangeStr.match(/\d+/g);
+                        if (!numeri) return false;
+                        
+                        let min = parseInt(numeri[0]);
+                        let max = numeri.length > 1 ? parseInt(numeri[1]) : min;
+                        
+                        // Gestione speciale per 7+
+                        if(target === 7) return max >= 7;
+                        
+                        // Controllo standard
+                        return target >= min && target <= max;
+                    });
+                }
             }
-            
-            // Filtro per DIFFICOLTÀ (Con operatore AND)
-            if (filtroDiffAttivo !== 'TUTTE') {
-                filtrati = filtrati.filter(g => {
-                    let diff = (g.DIFFICOLTA || g['DIFFICOLTÀ'] || "").trim();
-                    return diff === filtroDiffAttivo;
-                });
-            }
+
+            // 3. Ordinamento
+            filtrati.sort((a, b) => {
+                // L'evidenza vince sempre (se si ordina per consigliati)
+                let aEvid = (a.EVIDENZA || "").toString().trim().toUpperCase() === "SI" ? 1 : 0;
+                let bEvid = (b.EVIDENZA || "").toString().trim().toUpperCase() === "SI" ? 1 : 0;
+                
+                if (statoFiltri.ordinamento === 'consigliati') {
+                    if (aEvid !== bEvid) return bEvid - aEvid; // Prima i SI
+                    return a.GIOCO.localeCompare(b.GIOCO); // Poi alfabetico
+                }
+                else if (statoFiltri.ordinamento === 'az') {
+                    return a.GIOCO.localeCompare(b.GIOCO);
+                }
+                else if (statoFiltri.ordinamento === 'durata_asc') {
+                    let durA = parseInt(a.DURATA) || 999;
+                    let durB = parseInt(b.DURATA) || 999;
+                    return durA - durB;
+                }
+                else if (statoFiltri.ordinamento === 'diff_asc') {
+                    let diffA = (a.DIFFICOLTA || a['DIFFICOLTÀ'] || "").length;
+                    let diffB = (b.DIFFICOLTA || b['DIFFICOLTÀ'] || "").length;
+                    return diffA - diffB;
+                }
+                return 0;
+            });
             
             disegnaGriglia(filtrati);
         }
 
-        function applicaFiltroTipo(tipo, bottonePremuto) {
-            filtroTipoAttivo = tipo;
+        // ==========================================
+        // HANDLER DEGLI EVENTI (Click UI)
+        // ==========================================
+        function applicaFiltroTipo(tipo, btnEl) {
+            statoFiltri.tipo = tipo;
+            statoFiltri.ricercaEsatta = null; // Resetta ricerche forzate
             
-            if (bottonePremuto) {
-                document.querySelectorAll('.btn-tipo').forEach(btn => btn.classList.remove('active', 'f-tutti', 'f-veloci', 'f-collaborare', 'f-bluff', 'f-strategia'));
-                bottonePremuto.classList.add('active');
-                
-                if(tipo === 'TUTTI') bottonePremuto.classList.add('f-tutti');
-                else if(tipo.includes('VELOC')) bottonePremuto.classList.add('f-veloci');
-                else if(tipo.includes('COLLABORAR')) bottonePremuto.classList.add('f-collaborare');
-                else if(tipo.includes('BLUFF')) bottonePremuto.classList.add('f-bluff');
-                else if(tipo.includes('STRATEGIA')) bottonePremuto.classList.add('f-strategia');
+            if (btnEl) {
+                document.querySelectorAll('#filter-tipo .filter-btn').forEach(btn => {
+                    btn.classList.remove('active', 'f-tutti', 'f-veloci', 'f-coop', 'f-bluff', 'f-strat');
+                });
+                btnEl.classList.add('active');
+                if(tipo === 'TUTTI') btnEl.classList.add('f-tutti');
+                else if(tipo.includes('VELOC')) btnEl.classList.add('f-veloci');
+                else if(tipo.includes('COLLABORAR')) btnEl.classList.add('f-coop');
+                else if(tipo.includes('BLUFF')) btnEl.classList.add('f-bluff');
+                else if(tipo.includes('STRATEGIA')) btnEl.classList.add('f-strat');
             }
             
-            filtraERidisegna();
+            chiudiSommelierVisivo();
+            elaboraERidisegna();
         }
 
-        function applicaFiltroDiff(diff, bottonePremuto) {
-            filtroDiffAttivo = diff;
+        function applicaFiltroGiocatori(num, btnEl) {
+            statoFiltri.giocatori = num;
+            statoFiltri.ricercaEsatta = null;
             
-            if (bottonePremuto) {
-                document.querySelectorAll('.btn-diff').forEach(btn => btn.classList.remove('active', 'f-diff'));
-                bottonePremuto.classList.add('active', 'f-diff');
+            if (btnEl) {
+                document.querySelectorAll('#filter-giocatori .filter-btn').forEach(btn => btn.classList.remove('active', 'f-gioc'));
+                btnEl.classList.add('active', 'f-gioc');
+            }
+            chiudiSommelierVisivo();
+            elaboraERidisegna();
+        }
+
+        function applicaOrdinamento() {
+            statoFiltri.ordinamento = document.getElementById('sort-select').value;
+            elaboraERidisegna();
+        }
+
+        function cercaGiocoEsatto(nome) {
+            // Usato dai bottoni dei Classici
+            statoFiltri.ricercaEsatta = nome;
+            
+            // Resetta visivamente i bottoni dei filtri
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active', 'f-tutti', 'f-veloci', 'f-coop', 'f-bluff', 'f-strat', 'f-gioc'));
+            
+            // Scrolla in cima ai giochi
+            document.getElementById('game-list').scrollIntoView({ behavior: 'smooth' });
+            elaboraERidisegna();
+        }
+
+        // ==========================================
+        // SOMMELIER (Scegli per noi)
+        // ==========================================
+        function avviaSommelier() {
+            // Simulazione di un mini-quiz (per semplicità usiamo prompt successivi, in V3 si farà modale multipagina)
+            let nGiocatori = prompt("Passo 1/2: In quanti siete al tavolo? (Scrivi un numero da 2 a 8)");
+            if(!nGiocatori || isNaN(parseInt(nGiocatori))) return;
+            
+            let targetGiocatori = parseInt(nGiocatori);
+
+            let mood = prompt("Passo 2/2: Che tipo di partita volete fare?\n1 = Partita Lampo/Risate\n2 = Collaborativo\n3 = Sospetto e Bluff\n4 = Tattica e Ragionamento\n(Scrivi il numero 1, 2, 3 o 4)");
+            if(!mood || !['1','2','3','4'].includes(mood)) return;
+
+            // Traduciamo la scelta
+            let tipoCercato = 'TUTTI';
+            let nomeMood = "";
+            if(mood === '1') { tipoCercato = 'VELOC'; nomeMood = "Lampo/Risate"; }
+            if(mood === '2') { tipoCercato = 'COLLABORAR'; nomeMood = "Tutti Uniti"; }
+            if(mood === '3') { tipoCercato = 'BLUFF'; nomeMood = "Bluff"; }
+            if(mood === '4') { tipoCercato = 'STRATEGIA'; nomeMood = "Tattica"; }
+
+            // Applica i filtri segretamente
+            statoFiltri.giocatori = targetGiocatori >= 7 ? 7 : targetGiocatori;
+            statoFiltri.tipo = tipoCercato;
+            statoFiltri.ricercaEsatta = null;
+            statoFiltri.ordinamento = 'consigliati';
+
+            // Aggiorna interfaccia per mostrare il risultato
+            document.getElementById('sommelier-result').style.display = 'block';
+            document.getElementById('somm-criteri').innerText = targetGiocatori + " Giocatori e " + nomeMood;
+            
+            // Togliamo l'evidenza dai bottoni normali
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active', 'f-tutti', 'f-veloci', 'f-coop', 'f-bluff', 'f-strat', 'f-gioc'));
+
+            elaboraERidisegna();
+        }
+
+        function chiudiSommelier() {
+            chiudiSommelierVisivo();
+            // Resetta i filtri a TUTTI
+            applicaFiltroTipo('TUTTI', document.querySelector('#filter-tipo .filter-btn'));
+            applicaFiltroGiocatori('TUTTI', document.querySelector('#filter-giocatori .filter-btn'));
+        }
+
+        function chiudiSommelierVisivo() {
+            document.getElementById('sommelier-result').style.display = 'none';
+        }
+
+
+        // ==========================================
+        // MODAL E PRENOTAZIONI
+        // ==========================================
+        function apriModal(nome) {
+            giocoDaPrenotare = nome;
+            document.getElementById('modal-game-name').innerText = nome;
+            
+            // Pre-compila se avevamo già salvato un nome nel telefono
+            let nomeSalvato = localStorage.getItem('lillium_nome_tavolo');
+            if(nomeSalvato) {
+                document.getElementById('modal-input-nome').value = nomeSalvato;
             }
             
-            filtraERidisegna();
+            document.getElementById('modal-prenota').style.display = 'flex';
+            document.getElementById('modal-input-nome').focus();
         }
 
-        async function caricaGiochi(isPrenotazione = false) {
-            const loadingContainer = document.getElementById('loading-container');
-            const loadingText = document.getElementById('loading-text');
-            const progressFill = document.getElementById('progress-fill');
-            const gameList = document.getElementById('game-list');
-            const filters = document.getElementById('filters');
-            
-            loadingContainer.style.display = 'block';
-            gameList.style.display = 'none';
-            filters.style.display = 'none';
-            loadingText.innerText = isPrenotazione ? "Aggiornamento tavoli... 0%" : "Connessione alla ludoteca... 0%";
-            progressFill.style.width = '0%';
+        function chiudiModal() {
+            document.getElementById('modal-prenota').style.display = 'none';
+            document.getElementById('modal-input-nome').value = "";
+        }
 
+        async function confermaPrenotazione() {
+            let nomeTavolo = document.getElementById('modal-input-nome').value.trim();
+            if (!nomeTavolo) {
+                alert("Per favore, inserisci un nome o il numero del tavolo.");
+                return;
+            }
+
+            // Salva il nome per la prossima volta
+            localStorage.setItem('lillium_nome_tavolo', nomeTavolo);
+            
+            chiudiModal();
+
+            // Avvia animazione caricamento
+            avviaSchermataCaricamento("Invio richiesta al bancone...", true);
+            
+            let urlPrenotazione = `${API_URL}?action=prenota&gioco=${encodeURIComponent(giocoDaPrenotare)}&nome=${encodeURIComponent(nomeTavolo)}`;
+            
+            try {
+                await fetch(urlPrenotazione);
+                caricaDati(true); // Ricarica silenziosamente
+            } catch (e) {
+                alert("Errore nell'invio della prenotazione.");
+                caricaDati(); 
+            }
+        }
+
+        // (Solo Admin)
+        async function liberaGiocoAdmin(nomeGioco) {
+            if(!confirm(`Sei sicuro di voler liberare ${nomeGioco}? Questo azzererà il contatore e cancellerà i nomi.`)) return;
+            
+            avviaSchermataCaricamento("Ritiro gioco in corso...", true);
+            let urlLibera = `${API_URL}?action=libera&gioco=${encodeURIComponent(nomeGioco)}`;
+            try {
+                await fetch(urlLibera);
+                caricaDati(true); 
+            } catch (e) {
+                alert("Errore durante l'operazione.");
+                caricaDati(); 
+            }
+        }
+
+
+        // ==========================================
+        // CORE: LETTURA DATI DA GOOGLE SCRIPT
+        // ==========================================
+        function avviaSchermataCaricamento(testo, nascondiGriglia = false) {
+            document.getElementById('loading-container').style.display = 'block';
+            document.getElementById('loading-text').innerText = testo + " 0%";
+            document.getElementById('progress-fill').style.width = '0%';
+            
+            if(nascondiGriglia) {
+                document.getElementById('game-list').style.display = 'none';
+                document.getElementById('controls').style.display = 'none';
+                document.getElementById('classici-section').style.display = 'none';
+                document.getElementById('btn-sommelier').style.display = 'none';
+            }
+            
             let progress = 0;
-            let progressInterval = setInterval(() => {
-                if (progress < 50) progress += Math.floor(Math.random() * 10) + 5;
-                else if (progress < 85) progress += Math.floor(Math.random() * 5) + 2;
+            window.loadingInterval = setInterval(() => {
+                if (progress < 50) progress += 8;
+                else if (progress < 85) progress += 3;
                 else if (progress < 95) progress += 1;
-                
                 if (progress > 95) progress = 95;
                 
-                loadingText.innerText = (isPrenotazione ? "Aggiornamento tavoli... " : "Connessione alla ludoteca... ") + progress + "%";
-                progressFill.style.width = progress + '%';
-            }, 200);
+                document.getElementById('loading-text').innerText = testo + " " + progress + "%";
+                document.getElementById('progress-fill').style.width = progress + '%';
+            }, 150);
+        }
+
+        async function caricaDati(isRefresh = false) {
+            if(!isRefresh) avviaSchermataCaricamento("Connessione alla ludoteca...", true);
 
             try {
                 const response = await fetch(API_URL);
                 let data = await response.json();
                 
+                // Pre-processamento: "Ricorda" il TIPO se la cella sotto è vuota
                 let ultimoTipoConosciuto = "GIOCO";
                 data.forEach(gioco => {
-                    if (gioco.TIPO && gioco.TIPO.trim() !== "") {
-                        ultimoTipoConosciuto = gioco.TIPO.trim().toUpperCase();
+                    // Cerca in tutte le possibili varianti del nome colonna TIPO generate dal CSV
+                    let tipoRaw = gioco.TIPO || gioco['TIPO '] || gioco[' TIPO']; 
+                    if (tipoRaw && tipoRaw.toString().trim() !== "") {
+                        ultimoTipoConosciuto = tipoRaw.toString().trim().toUpperCase();
                     }
                     gioco.TIPO_EFFETTIVO = ultimoTipoConosciuto; 
                 });
 
                 tuttiIGiochi = data; 
                 
-                clearInterval(progressInterval);
-                loadingText.innerText = "Fatto! 100%";
-                progressFill.style.width = '100%';
+                // Fine Caricamento (Succede se la rete risponde)
+                clearInterval(window.loadingInterval);
+                document.getElementById('loading-text').innerText = "Fatto! 100%";
+                document.getElementById('progress-fill').style.width = '100%';
                 
                 setTimeout(() => {
-                    loadingContainer.style.display = 'none';
-                    filters.style.display = 'flex'; 
-                    gameList.style.display = 'grid';
+                    document.getElementById('loading-container').style.display = 'none';
+                    document.getElementById('controls').style.display = 'flex'; 
+                    document.getElementById('classici-section').style.display = 'block';
+                    document.getElementById('btn-sommelier').style.display = 'block';
+                    document.getElementById('game-list').style.display = 'grid';
                     
-                    // Ridisegna mantenendo i filtri attivi (tipo E difficoltà)
-                    filtraERidisegna();
+                    elaboraERidisegna();
                 }, 300);
 
             } catch (error) {
-                clearInterval(progressInterval);
-                loadingText.innerText = "Errore di connessione.";
-                loadingText.style.color = "red";
-                progressFill.style.backgroundColor = "red";
+                clearInterval(window.loadingInterval);
+                document.getElementById('loading-text').innerText = "Errore di connessione al database.";
+                document.getElementById('loading-text').style.color = "var(--danger)";
+                document.getElementById('progress-fill').style.backgroundColor = "var(--danger)";
+                console.error("Fetch Error:", error);
             }
         }
 
-        async function prenota(nomeGioco) {
-            let nomeTavolo = prompt(`Vuoi giocare a ${nomeGioco}? Inserisci il nome del tuo tavolo:`);
-            if (!nomeTavolo) return;
+        // START!
+        caricaDati();
 
-            let urlPrenotazione = `${API_URL}?action=prenota&gioco=${encodeURIComponent(nomeGioco)}&nome=${encodeURIComponent(nomeTavolo)}`;
-            
-            document.getElementById('game-list').style.display = 'none';
-            document.getElementById('filters').style.display = 'none';
-            document.getElementById('loading-container').style.display = 'block';
-            document.getElementById('loading-text').innerText = "Invio richiesta al bancone...";
-            document.getElementById('progress-fill').style.width = '50%';
-            
-            try {
-                await fetch(urlPrenotazione);
-                caricaGiochi(true); 
-            } catch (e) {
-                alert("Errore nell'invio della prenotazione.");
-                caricaGiochi(); 
-            }
-        }
-
-        caricaGiochi();
     </script>
 </body>
 </html>
