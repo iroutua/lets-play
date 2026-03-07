@@ -3,97 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LET'S PLAY | 8 Marzo</title>
+    <title>Menù Giochi | 8 Marzo</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #ffffff; padding: 20px; margin: 0; }
-        h1 { text-align: center; color: #facc15; margin-bottom: 30px; }
+        h1 { text-align: center; color: #facc15; margin-bottom: 20px; }
         
-        /* Griglia a mosaico responsiva */
-        .grid-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
-            gap: 20px; 
-            max-width: 1000px; 
-            margin: auto; 
-        }
+        /* Stili per i Filtri */
+        .filters-container { display: none; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; }
+        .filter-btn { background-color: #1e1e1e; color: #aaa; border: 2px solid #333; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.2s; font-size: 0.9em; }
+        .filter-btn:hover { border-color: #666; color: white; }
         
-        /* Singola Card quadrata */
-        .game-card { 
-            background: #1e1e1e; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5); 
-            position: relative;
-        }
+        /* Classi per i bottoni dei filtri attivi */
+        .filter-btn.active.f-tutti { background-color: #facc15; border-color: #facc15; color: #121212; }
+        .filter-btn.active.f-veloci { background-color: #f59e0b; border-color: #f59e0b; color: #121212; }
+        .filter-btn.active.f-collaborare { background-color: #10b981; border-color: #10b981; color: #121212; }
+        .filter-btn.active.f-bluff { background-color: #8b5cf6; border-color: #8b5cf6; color: white; }
+        .filter-btn.active.f-strategia { background-color: #ef4444; border-color: #ef4444; color: white; }
+
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; max-width: 1000px; margin: auto; }
+        .game-card { background: #1e1e1e; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 8px rgba(0,0,0,0.5); position: relative; animation: fadeIn 0.3s ease-in-out; }
         
-        /* Immagine di copertina (rapporto 1:1) */
-        .card-img { 
-            width: 100%; 
-            aspect-ratio: 1 / 1; 
-            object-fit: cover; 
-            background-color: #333;
-        }
-        
-        /* Contenuto testuale */
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        .card-img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background-color: #333; }
         .card-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; text-align: center; }
         .game-title { font-size: 1.1em; font-weight: bold; margin: 0 0 5px 0; }
         .game-info { font-size: 0.8em; color: #aaa; margin-bottom: 12px; }
         
-        /* ETICHETTA TIPO (In alto a sinistra) */
-        .type-label {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.7em;
-            font-weight: 900;
-            color: white;
-            text-transform: uppercase;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.6);
-            z-index: 10;
-        }
-        
-        /* Colori per le categorie */
-        .tipo-veloci { background-color: #f59e0b; } /* Arancione */
-        .tipo-collaborare { background-color: #10b981; } /* Verde */
-        .tipo-bluff { background-color: #8b5cf6; } /* Viola */
-        .tipo-strategia { background-color: #ef4444; } /* Rosso */
-        .tipo-default { background-color: #64748b; } /* Grigio base per tipi non riconosciuti */
+        .type-label { position: absolute; top: 8px; left: 8px; padding: 4px 8px; border-radius: 4px; font-size: 0.7em; font-weight: 900; color: white; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.6); z-index: 10; }
+        .tipo-veloci { background-color: #f59e0b; } 
+        .tipo-collaborare { background-color: #10b981; } 
+        .tipo-bluff { background-color: #8b5cf6; } 
+        .tipo-strategia { background-color: #ef4444; } 
+        .tipo-default { background-color: #64748b; } 
 
-        /* Bollino rosso del contatore (In alto a destra) */
-        .badge { 
-            position: absolute; 
-            top: 8px; 
-            right: 8px; 
-            background: #e02424; 
-            color: white; 
-            border-radius: 50%; 
-            width: 28px; 
-            height: 28px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: bold; 
-            font-size: 0.9em; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.6); 
-            z-index: 10;
-        }
+        .badge { position: absolute; top: 8px; right: 8px; background: #e02424; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.6); z-index: 10; }
         
-        /* Bottone prenota */
         .btn-prenota { background-color: #2563eb; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: bold; width: 100%; transition: background 0.2s; }
         .btn-prenota:hover { background-color: #1d4ed8; }
         
-        #loading { text-align: center; font-size: 1.2em; margin-top: 50px; color: #aaa; }
+        /* Stili per il caricamento */
+        #loading-container { text-align: center; margin-bottom: 30px; margin-top: 40px; }
+        #loading-text { font-size: 1.2em; color: #facc15; font-weight: bold; margin-bottom: 10px; }
+        .progress-bar-bg { width: 100%; max-width: 300px; height: 10px; background-color: #333; border-radius: 5px; margin: auto; overflow: hidden; }
+        .progress-bar-fill { height: 100%; width: 0%; background-color: #facc15; transition: width 0.2s ease-out; }
     </style>
 </head>
 <body>
 
     <h1>🎲 Menù Giochi Lillium</h1>
-    <div id="loading">Caricamento catalogo in corso...</div>
-    <div id="game-list" class="grid-container"></div>
+    
+    <div id="loading-container">
+        <div id="loading-text">Connessione alla ludoteca... 0%</div>
+        <div class="progress-bar-bg">
+            <div id="progress-fill" class="progress-bar-fill"></div>
+        </div>
+    </div>
+
+    <div id="filters" class="filters-container">
+        <button class="filter-btn active f-tutti" onclick="applicaFiltro('TUTTI', this)">TUTTI</button>
+        <button class="filter-btn" onclick="applicaFiltro('VELOC', this)">VELOCI</button>
+        <button class="filter-btn" onclick="applicaFiltro('COLLABORAR', this)">COLLABORARE</button>
+        <button class="filter-btn" onclick="applicaFiltro('BLUFF', this)">BLUFF</button>
+        <button class="filter-btn" onclick="applicaFiltro('STRATEGIA', this)">STRATEGIA</button>
+    </div>
+
+    <div id="game-list" class="grid-container" style="display: none;"></div>
 
     <script>
         // ⚠️ INCOLLA QUI L'URL DI GOOGLE APPS SCRIPT
@@ -101,58 +76,132 @@
         
         const DEFAULT_IMG = "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg";
 
-        async function caricaGiochi() {
+        let tuttiIGiochi = []; // Memoria globale per tutti i giochi scaricati
+        let filtroAttivo = 'TUTTI'; // Memorizza il filtro attualmente selezionato
+
+        // Funzione per disegnare le card (accetta l'array di giochi da mostrare)
+        function disegnaGriglia(listaGiochi) {
+            const list = document.getElementById('game-list');
+            list.innerHTML = '';
+
+            listaGiochi.forEach(gioco => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                
+                let tipoClass = "tipo-default";
+                if(gioco.TIPO_EFFETTIVO.includes("VELOC")) tipoClass = "tipo-veloci";
+                else if(gioco.TIPO_EFFETTIVO.includes("COLLABORAR") || gioco.TIPO_EFFETTIVO.includes("COOP")) tipoClass = "tipo-collaborare";
+                else if(gioco.TIPO_EFFETTIVO.includes("BLUFF")) tipoClass = "tipo-bluff";
+                else if(gioco.TIPO_EFFETTIVO.includes("STRATEGIA")) tipoClass = "tipo-strategia";
+
+                let contatore = parseInt(gioco.PRENOTAZIONI);
+                contatore = isNaN(contatore) ? 0 : contatore;
+                let badgeHtml = contatore > 0 ? `<div class="badge">${contatore}</div>` : '';
+                
+                let imageUrl = gioco.IMMAGINE ? gioco.IMMAGINE : DEFAULT_IMG;
+
+                card.innerHTML = `
+                    <div class="type-label ${tipoClass}">${gioco.TIPO_EFFETTIVO}</div>
+                    ${badgeHtml}
+                    <img src="${imageUrl}" class="card-img" onerror="this.src='${DEFAULT_IMG}'">
+                    <div class="card-content">
+                        <div>
+                            <div class="game-title">${gioco.GIOCO}</div>
+                            <div class="game-info">👥 ${gioco["N.G."]} | ⏳ ${gioco.DURATA}'<br> ${gioco.DIFFICOLTA}</div>
+                        </div>
+                        <button class="btn-prenota" onclick="prenota('${gioco.GIOCO}')">Prenota</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        // Funzione per gestire i click sui bottoni dei filtri
+        function applicaFiltro(tipo, bottonePremuto) {
+            filtroAttivo = tipo;
+
+            // Aggiorna lo stile dei bottoni (toglie 'active' da tutti, lo mette a quello premuto)
+            if (bottonePremuto) {
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    // Rimuove tutte le classi di colore attivo
+                    btn.classList.remove('active', 'f-tutti', 'f-veloci', 'f-collaborare', 'f-bluff', 'f-strategia');
+                });
+                
+                bottonePremuto.classList.add('active');
+                if(tipo === 'TUTTI') bottonePremuto.classList.add('f-tutti');
+                else if(tipo.includes('VELOC')) bottonePremuto.classList.add('f-veloci');
+                else if(tipo.includes('COLLABORAR')) bottonePremuto.classList.add('f-collaborare');
+                else if(tipo.includes('BLUFF')) bottonePremuto.classList.add('f-bluff');
+                else if(tipo.includes('STRATEGIA')) bottonePremuto.classList.add('f-strategia');
+            }
+
+            // Filtra l'array e ridisegna
+            if (tipo === 'TUTTI') {
+                disegnaGriglia(tuttiIGiochi);
+            } else {
+                const giochiFiltrati = tuttiIGiochi.filter(g => g.TIPO_EFFETTIVO.includes(tipo));
+                disegnaGriglia(giochiFiltrati);
+            }
+        }
+
+        async function caricaGiochi(isPrenotazione = false) {
+            const loadingContainer = document.getElementById('loading-container');
+            const loadingText = document.getElementById('loading-text');
+            const progressFill = document.getElementById('progress-fill');
+            const gameList = document.getElementById('game-list');
+            const filters = document.getElementById('filters');
+            
+            loadingContainer.style.display = 'block';
+            gameList.style.display = 'none';
+            filters.style.display = 'none';
+            loadingText.innerText = isPrenotazione ? "Aggiornamento tavoli... 0%" : "Connessione alla ludoteca... 0%";
+            progressFill.style.width = '0%';
+
+            let progress = 0;
+            let progressInterval = setInterval(() => {
+                if (progress < 50) progress += Math.floor(Math.random() * 10) + 5;
+                else if (progress < 85) progress += Math.floor(Math.random() * 5) + 2;
+                else if (progress < 95) progress += 1;
+                
+                if (progress > 95) progress = 95;
+                
+                loadingText.innerText = (isPrenotazione ? "Aggiornamento tavoli... " : "Connessione alla ludoteca... ") + progress + "%";
+                progressFill.style.width = progress + '%';
+            }, 200);
+
             try {
                 const response = await fetch(API_URL);
-                const data = await response.json();
+                let data = await response.json();
                 
-                document.getElementById('loading').style.display = 'none';
-                const list = document.getElementById('game-list');
-                list.innerHTML = '';
-
-                let ultimoTipoConosciuto = "GIOCO"; // Memoria per le celle vuote di Excel
-
+                // PRE-ELABORAZIONE DATI: Risolve le celle vuote della colonna TIPO
+                let ultimoTipoConosciuto = "GIOCO";
                 data.forEach(gioco => {
-                    const card = document.createElement('div');
-                    card.className = 'game-card';
-                    
-                    // GESTIONE DEL TIPO (con recupero automatico se la cella è vuota)
-                    let tipoAttuale = gioco.TIPO ? gioco.TIPO.trim().toUpperCase() : ultimoTipoConosciuto;
-                    ultimoTipoConosciuto = tipoAttuale; // salva per il giro successivo
-                    
-                    // Assegnazione del colore in base al nome
-                    let tipoClass = "tipo-default";
-                    if(tipoAttuale.includes("VELOC")) tipoClass = "tipo-veloci";
-                    else if(tipoAttuale.includes("COLLABORAR") || tipoAttuale.includes("COOP")) tipoClass = "tipo-collaborare";
-                    else if(tipoAttuale.includes("BLUFF")) tipoClass = "tipo-bluff";
-                    else if(tipoAttuale.includes("STRATEGIA")) tipoClass = "tipo-strategia";
-
-                    // GESTIONE CONTATORE PRENOTAZIONI
-                    let contatore = parseInt(gioco.PRENOTAZIONI);
-                    contatore = isNaN(contatore) ? 0 : contatore;
-                    let badgeHtml = contatore > 0 ? `<div class="badge">${contatore}</div>` : '';
-                    
-                    // GESTIONE IMMAGINE
-                    let imageUrl = gioco.IMMAGINE ? gioco.IMMAGINE : DEFAULT_IMG;
-
-                    // CREAZIONE DELLA CARD HTML
-                    card.innerHTML = `
-                        <div class="type-label ${tipoClass}">${tipoAttuale}</div>
-                        ${badgeHtml}
-                        <img src="${imageUrl}" alt="${gioco.GIOCO}" class="card-img" onerror="this.src='${DEFAULT_IMG}'">
-                        <div class="card-content">
-                            <div>
-                                <div class="game-title">${gioco.GIOCO}</div>
-                                <div class="game-info">👥 ${gioco["N.G."]} | ⏳ ${gioco.DURATA}'<br> ${gioco.DIFFICOLTA}</div>
-                            </div>
-                            <button class="btn-prenota" onclick="prenota('${gioco.GIOCO}')">Prenota</button>
-                        </div>
-                    `;
-                    list.appendChild(card);
+                    if (gioco.TIPO && gioco.TIPO.trim() !== "") {
+                        ultimoTipoConosciuto = gioco.TIPO.trim().toUpperCase();
+                    }
+                    gioco.TIPO_EFFETTIVO = ultimoTipoConosciuto; // Crea una nuova proprietà sicura
                 });
+
+                tuttiIGiochi = data; // Salva i dati completi in memoria
+                
+                clearInterval(progressInterval);
+                loadingText.innerText = "Fatto! 100%";
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    loadingContainer.style.display = 'none';
+                    filters.style.display = 'flex'; // Mostra i bottoni dei filtri
+                    gameList.style.display = 'grid';
+                    
+                    // Ridisegna mantenendo il filtro che era attivo (utile dopo una prenotazione!)
+                    applicaFiltro(filtroAttivo, null);
+                }, 300);
+
             } catch (error) {
-                document.getElementById('loading').innerText = "Errore nel caricamento. Riprova.";
-                console.error("Errore Fetch:", error);
+                clearInterval(progressInterval);
+                loadingText.innerText = "Errore di connessione.";
+                loadingText.style.color = "red";
+                progressFill.style.backgroundColor = "red";
             }
         }
 
@@ -160,19 +209,24 @@
             let nomeTavolo = prompt(`Vuoi giocare a ${nomeGioco}? Inserisci il nome del tuo tavolo:`);
             if (!nomeTavolo) return;
 
-            alert("Richiesta inviata! Attendi un istante...");
-            
             let urlPrenotazione = `${API_URL}?action=prenota&gioco=${encodeURIComponent(nomeGioco)}&nome=${encodeURIComponent(nomeTavolo)}`;
             
-            await fetch(urlPrenotazione);
+            document.getElementById('game-list').style.display = 'none';
+            document.getElementById('filters').style.display = 'none';
+            document.getElementById('loading-container').style.display = 'block';
+            document.getElementById('loading-text').innerText = "Invio richiesta al bancone...";
+            document.getElementById('progress-fill').style.width = '50%';
             
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('game-list').innerHTML = '';
-            caricaGiochi();
+            try {
+                await fetch(urlPrenotazione);
+                caricaGiochi(true); 
+            } catch (e) {
+                alert("Errore nell'invio della prenotazione.");
+                caricaGiochi(); 
+            }
         }
 
         caricaGiochi();
     </script>
 </body>
 </html>
-
