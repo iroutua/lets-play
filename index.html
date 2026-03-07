@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lillium - Prenota Gioco</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; max-width: 600px; margin: auto; }
+        h1 { text-align: center; color: #333; }
+        .game-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .game-title { font-size: 1.2em; font-weight: bold; margin-bottom: 5px; }
+        .game-info { font-size: 0.9em; color: #666; margin-bottom: 10px; }
+        .btn-prenota { background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1em; width: 100%; }
+        .btn-prenota:disabled { background-color: #ccc; cursor: not-allowed; }
+        .occupato { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>🎲 Menù Giochi Lillium</h1>
+    <div id="loading">Caricamento giochi in corso...</div>
+    <div id="game-list"></div>
+
+    <script>
+        // Sostituisci la stringa qui sotto con l'URL generato da Google Apps Script
+        const API_URL = "https://script.google.com/macros/s/AKfycbwOYxkEbMaQvrwcF-V6je7HlX7Rn2G8P53Go3n6RqAIp8N14BNfYlHcUiQhHw5gtPFx6g/exec";
+
+        async function caricaGiochi() {
+            const response = await fetch(API_URL);
+            const data = await response.json();
+            
+            document.getElementById('loading').style.display = 'none';
+            const list = document.getElementById('game-list');
+            list.innerHTML = '';
+
+            data.forEach(gioco => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                
+                let isOccupato = gioco.STATO === "Occupato";
+                let btnHtml = isOccupato 
+                    ? `<p class="occupato">Occupato da: ${gioco.PRENOTATO_DA}</p>` 
+                    : `<button class="btn-prenota" onclick="prenota('${gioco.GIOCO}')">Prenota</button>`;
+
+                card.innerHTML = `
+                    <div class="game-title">${gioco.GIOCO} <span style="font-size: 0.8em; color: gray;">(${gioco.TIPO})</span></div>
+                    <div class="game-info">👥 ${gioco["N.G."]} | ⏳ ${gioco.DURATA} min | 🧠 ${gioco.DIFFICOLTA}</div>
+                    ${btnHtml}
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        async function prenota(nomeGioco) {
+            let nomeTavolo = prompt(`Vuoi prenotare ${nomeGioco}? Inserisci il tuo nome o il numero del tavolo:`);
+            if (!nomeTavolo) return; // Se l'utente annulla
+
+            alert("Prenotazione in corso, attendi...");
+            
+            // Invia la richiesta al Google Script
+            let urlPrenotazione = `${API_URL}?action=prenota&gioco=${encodeURIComponent(nomeGioco)}&nome=${encodeURIComponent(nomeTavolo)}`;
+            
+            await fetch(urlPrenotazione);
+            alert("Prenotato con successo! Il gioco arriverà a breve.");
+            
+            // Ricarica la lista per mostrare il gioco come occupato
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('game-list').innerHTML = '';
+            caricaGiochi();
+        }
+
+        // Carica i giochi appena si apre la pagina
+        caricaGiochi();
+    </script>
+</body>
+</html>
